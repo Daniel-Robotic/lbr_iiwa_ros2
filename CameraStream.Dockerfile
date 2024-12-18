@@ -38,7 +38,7 @@ COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partaa /tmp/
 COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partab /tmp/
 COPY ./vision/* /tmp/vision/
 
-RUN cat torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.part* > torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
+RUN cat /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.part* > /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
 
 # Установка PyToroch с поддержкой GPU для Jetson
 RUN pip3 install --upgrade pip && \

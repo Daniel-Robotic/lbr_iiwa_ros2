@@ -3,6 +3,8 @@ general_settings:
   camera_list:
     - "IntelCamera"
     - "D455_front"
+    - "L515_lidar"
+    - "D455_left"
 
 robot_settings:
   robot_ip: 192.168.21.147
