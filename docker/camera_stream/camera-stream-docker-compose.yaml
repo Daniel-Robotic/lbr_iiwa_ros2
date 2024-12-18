@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: jetson-ros2-pytorch
+    image: camera-stream-ros2
     container_name: camera-stream-container
     network_mode: host
     restart: unless-stopped
