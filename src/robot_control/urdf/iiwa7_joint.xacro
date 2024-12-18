@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Соединения -->
+    <joint name="virtual_joint" type="fixed">
+        <!-- <parent link="plate_under_link"/> -->
+        <parent link="world"/>      
+        <child link="link_0"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0.0 0.0"/>
+    </joint>
+
+    <joint name="joint_1" type="revolute">
+        <parent link="link_0"/>
+        <child link="link_1"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-170 * pi / 180}" upper="${170 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0 0.15" rpy="0 0 0"/>
+    </joint>
+
+    <joint name="joint_2" type="revolute">
+        <parent link="link_1"/>
+        <child link="link_2"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-120 * pi / 180}" upper="${120 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0 0.185" rpy="${pi/2} 0 ${pi}"/>
+    </joint>
+    
+    <joint name="joint_3" type="revolute">
+        <parent link="link_2"/>
+        <child link="link_3"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-170 * pi / 180}" upper="${170 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0.21 0" rpy="${pi/2} 0 ${pi}"/>
+    </joint>
+
+    <joint name="joint_4" type="revolute">
+        <parent link="link_3"/>
+        <child link="link_4"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-120 * pi / 180}" upper="${120 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0 0.19" rpy="${pi/2} 0 0"/>
+    </joint>
+
+    <joint name="joint_5" type="revolute">
+        <parent link="link_4"/>
+        <child link="link_5"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-170 * pi / 180}" upper="${170 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0.21 0" rpy="${-pi/2} ${pi} 0"/>
+    </joint>
+
+    <joint name="joint_6" type="revolute">
+        <parent link="link_5"/>
+        <child link="link_6"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-120 * pi / 180}" upper="${120 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0.06070 0.19" rpy="${pi/2} 0 0"/>
+    </joint>
+
+    <joint name="joint_7" type="revolute">
+        <parent link="link_6"/>
+        <child link="link_7"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="${-175 * pi / 180}" upper="${175 * pi / 180}" velocity="${velocity}" effort="${effort}"/>
+        <origin xyz="0 0.081 0.06070" rpy="${-pi/2} ${pi} 0"/>
+    </joint>
+
+    <joint name="iiwa_joint_ee" type="fixed">
+        <parent link="link_7"/>
+        <child link="link_ee"/>
+        <origin rpy="0 ${pi/2} 0" xyz="0 0 0.045"/>
+    </joint>
+
+    <xacro:iiwa_transmission number="1"/>
+    <xacro:iiwa_transmission number="2"/>
+    <xacro:iiwa_transmission number="3"/>
+    <xacro:iiwa_transmission number="4"/>
+    <xacro:iiwa_transmission number="5"/>
+    <xacro:iiwa_transmission number="6"/>
+    <xacro:iiwa_transmission number="7"/>
+
+
+</robot>

@@ -1,0 +1,7 @@
+string first_camera_name
+string second_camera_name
+---
+lbr_intel_camera_interface/CalibrationData first_camera_calibration_info
+lbr_intel_camera_interface/CalibrationData second_camera_calibration_info
+float64[9] rotation_matrix
+float64[3] translation_vector

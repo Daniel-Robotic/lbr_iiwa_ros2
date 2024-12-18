@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Переменные -->
+    <!-- <xacro:property name="mesh_link" value="package://robot_control/meshes/iiwa7/visual"/> -->
+
+    <xacro:property name="mesh_link" value="file://$(find robot_control)/meshes/iiwa7/visual"/>
+    <xacro:property name="mesh_collision" value="file://$(find robot_control)/meshes/iiwa7/collision"/>
+
+    <xacro:property name="size" value="1 1 1"/>
+    <xacro:property name="effort" value="300"/>
+    <xacro:property name="velocity" value="10"/>
+
+    <xacro:macro name="iiwa_transmission" params="number">
+        <transmission name="$tran_${number}">
+            <plugin>transmission_interface/SimpleTransmission</plugin>
+            <joint name="$joint_${number}" role="joint1">
+                <mechanical_reduction>1</mechanical_reduction>
+            </joint>
+            <actuator name="$motor_${number}" role="actuator1" />
+        </transmission>
+    </xacro:macro>
+
+    <xacro:macro name="contact_sensor_link" params="number">
+        <gazebo reference="link_${number}">
+            <sensor name='sensor_contact_link_${number}' type='contact'>
+                <contact>
+                    <collision>link_${number}_collision</collision> 
+                    <topic>/iiwa7/sensors/contacts/link_${number}</topic>
+                </contact>
+            </sensor>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="imu_sensor_link" params="number">
+        <gazebo reference="link_${number}">
+            <sensor name="iiwa_imu_link_${number}" type="imu">
+                <always_on>true</always_on>
+                <update_rate>200</update_rate>
+                <topic>/iiwa7/sensors/imu/link_${number}</topic>
+              </sensor>
+        </gazebo>
+    </xacro:macro>
+
+
+</robot>

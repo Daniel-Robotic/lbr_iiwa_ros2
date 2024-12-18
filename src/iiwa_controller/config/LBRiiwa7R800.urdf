@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="LBRiiwa7R800">
+    
+    <webots>
+        <plugin type="iiwa_controller.LBRiiwa_controller.LBRController"> 
+            <robotName>LBRiiwa7R800</robotName>
+            <threshold>0.7</threshold>
+        </plugin>
+    </webots>
+</robot>

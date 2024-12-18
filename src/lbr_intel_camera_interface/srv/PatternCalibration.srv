@@ -1,0 +1,5 @@
+uint8 calibration_width
+uint8 calibration_height
+---
+bool success
+string message

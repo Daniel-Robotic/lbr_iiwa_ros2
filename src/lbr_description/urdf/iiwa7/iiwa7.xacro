@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!-- top level -->
+<robot name="iiwa7" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- include the lbr iiwa macro -->
+    <xacro:include filename="$(find lbr_description)/urdf/iiwa7/iiwa7_description.xacro" />
+
+    <xacro:arg name="robot_name" default="lbr" />
+
+    <!-- KDL requires a link without inertia -->
+    <link name="$(arg robot_name)_floating_link" />
+
+    <joint name="$(arg robot_name)_floating_joint" type="fixed">
+        <parent link="$(arg robot_name)_floating_link" />
+        <child link="$(arg robot_name)_link_0" />
+    </joint>
+
+    <!-- iiwa -->
+    <xacro:iiwa7 robot_name="$(arg robot_name)"/>
+</robot>

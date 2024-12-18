@@ -1,0 +1,8 @@
+---
+string device_name
+string product_line
+string serial_number
+string firmware_version
+string usb_type
+string[] depth_profile
+string[] color_profile

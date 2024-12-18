@@ -1,0 +1,6 @@
+uint16 width
+uint16 height
+uint8 fps
+---
+bool status
+string message

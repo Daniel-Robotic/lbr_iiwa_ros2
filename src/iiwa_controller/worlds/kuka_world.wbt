@@ -1,0 +1,124 @@
+#VRML_SIM R2023a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/apartment_structure/protos/Wall.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/apartment_structure/protos/Door.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/apartment_structure/protos/Window.proto"
+
+
+EXTERNPROTO "https://raw.githubusercontent.com/Daniel-Robotic/webots_robots/refs/heads/main/protos/CollaborativeRobotTable.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/Daniel-Robotic/webots_robots/refs/heads/main/protos/LBRiiwa7R800.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/Daniel-Robotic/webots_robots/refs/heads/main/protos/ManufactoringFloor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/Daniel-Robotic/webots_robots/refs/heads/main/protos/WorkspaceLimiter.proto"
+
+
+WorldInfo {
+    title "kuka world"
+    basicTimeStep 10
+}
+
+Viewpoint {
+  orientation -0.330737150950355 0.14102977282110543 0.9331256829384075 2.384212654325378
+  position 3.6233923908686396 -3.9533069448602056 5.037462391187191
+}
+TexturedBackground {
+  texture "empty_office"
+}
+TexturedBackgroundLight {
+  texture "factory"
+}
+Floor {
+  size 13.75 8
+}
+CollaborativeRobotTable {
+  locked TRUE
+  showCabinet TRUE
+}
+LBRiiwa7R800 {
+  translation -0.267 0 0.813
+  controller "<extern>"
+}
+WorkspaceLimiter {
+  translation -1.34097 0.0511973 1
+  rotation 0 0 1 1.57
+  locked TRUE
+  countLimiter 2 2
+}
+DEF Walls Group {
+  children [
+    Wall {
+      translation 3.91998 4.1 0
+      rotation 0 0 1 1.5708
+      name "wall(2)"
+      size 0.2 1.9 2.4
+    }
+    Wall {
+      translation -3.96001 4.1 0
+      rotation 0 0 1 1.5708
+      name "wall(1)"
+      size 0.2 1.9 2.4
+    }
+    Wall {
+      translation -0.0100149 4.1 0
+      rotation 0 0 1 1.5708
+      size 0.2 2 2.4
+    }
+    Window {
+      translation 1.99 4.1 0
+      rotation 0 0 1 -1.5707953071795862
+      name "window(3)"
+      size 0.2 2 2.4
+    }
+    Window {
+      translation -2.01 4.1 0
+      rotation 0 0 1 -1.5707953071795862
+      name "window(2)"
+      size 0.2 2 2.4
+    }
+    Window {
+      translation 5.86 4.1 0
+      rotation 0 0 1 -1.5707953071795862
+      name "window(1)"
+      size 0.2 2 2.4
+    }
+    Window {
+      translation -5.89 4.1 0
+      rotation 0 0 1 -1.5707953071795862
+      size 0.2 2 2.4
+    }
+    Door {
+      translation 6.36 -3.89 0
+      rotation 0 0 1 -1.5707953071795862
+      size 0.1 1 2.4
+    }
+    Wall {
+      translation 1.50601e-05 -4.1 0
+      rotation 0 0 1 1.5708
+      name "wall_left"
+      size 0.2 14 2.4
+    }
+    Wall {
+      translation 6.97 0 0
+      name "wall_front"
+      size 0.2 8 2.4
+    }
+    Wall {
+      translation -6.97 0 0
+      name "wall_back"
+      size 0.2 8 2.4
+    }
+  ]
+}
+WorkspaceLimiter {
+  translation 0.15 1.26001 1
+  rotation 0 0 -1 -5.307179586466759e-06
+  name "WorkspaceLimiterRight"
+  locked TRUE
+  countLimiter 2 2
+  scale 1.2 1 1
+  spacing 0.01
+}
+

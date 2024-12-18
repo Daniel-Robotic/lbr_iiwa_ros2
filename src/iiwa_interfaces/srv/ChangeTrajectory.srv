@@ -1,0 +1,6 @@
+int32 time
+---
+bool status
+string message
+string[] joint_names
+float32[] position

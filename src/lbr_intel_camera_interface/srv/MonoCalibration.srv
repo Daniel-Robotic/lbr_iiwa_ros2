@@ -1,0 +1,3 @@
+string camera_name
+---
+lbr_intel_camera_interface/CalibrationData calibration_info

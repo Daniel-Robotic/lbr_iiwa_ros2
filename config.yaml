@@ -1,0 +1,34 @@
+general_settings:
+  robot_name: "LBRiiwa7R800"
+  camera_list:
+    - "IntelCamera"
+    - "D455_front"
+
+robot_settings:
+  robot_ip: 192.168.21.147
+  robot_port: 30200
+  recive_move_step: 50 # TODO: Не забудь убрать если сработает получение текущей позици
+  virtual_threshold: 0.7 # Метод который можно будет удалить
+
+  
+camera_settings:
+  width: 640
+  height: 480
+  fps: 30
+  flip_horizontally: False
+  flip_vertically: False
+  nn_state: False
+
+
+calibration_settings:
+  pattern_size: [6, 9]
+  convolution_size: 3
+  image_format_valid:
+    - png
+    - jpeg
+    - jpg
+  save_config:
+    pattern_frames_path: ""
+    config_name: "calibrationConfig"
+    overwrite_pattern_frames: False
+    save_calibration_info: True

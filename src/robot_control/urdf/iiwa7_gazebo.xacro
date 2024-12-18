@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Gazebo настройки -->
+
+    <!-- Газебо плагины для clasic-->
+    <!-- <gazebo>
+        <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+          <robot_param>robot_description</robot_param>
+          <robot_param_node>robot_state_publisher</robot_param_node>
+          <parameters>$(find iiwa_controller)/config/iiwa_contollers.yaml</parameters>
+        </plugin>
+    </gazebo> -->
+
+    <!-- Газебо плагины для ignition и выше-->
+    <gazebo>
+        <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+          <robot_param>robot_description</robot_param>
+          <robot_param_node>robot_state_publisher</robot_param_node>
+          <!-- <parameters>$(find robot_control)/config/robot_contoller.yaml</parameters> -->
+          <parameters>/home/ros/robotics_control_ros_ws/install/robot_control/share/robot_control/config/robot_controller.yaml</parameters>
+        </plugin>
+    </gazebo>
+
+    <gazebo reference="link_0">
+        <sensor name='sensor_contact' type='contact'>
+            <contact>
+                <collision>link_0_collision</collision>
+                <topic>/iiwa7/sensors/contacts/link_0</topic>
+            </contact>
+        </sensor>
+    </gazebo>
+
+    <xacro:contact_sensor_link number="1"/>
+    <xacro:contact_sensor_link number="2"/>
+    <xacro:contact_sensor_link number="3"/>
+    <xacro:contact_sensor_link number="4"/>
+    <xacro:contact_sensor_link number="5"/>
+    <xacro:contact_sensor_link number="6"/>
+    <xacro:contact_sensor_link number="7"/>
+
+    <!-- Контактный сенсор -->
+    <gazebo reference="link_0">
+        <sensor name="iiwa_imu" type="imu">
+            <always_on>true</always_on>
+            <update_rate>200</update_rate>
+            <topic>/iiwa7/sensors/imu/link_0</topic>
+          </sensor>
+    </gazebo>
+
+    <xacro:imu_sensor_link number="1"/>
+    <xacro:imu_sensor_link number="2"/>
+    <xacro:imu_sensor_link number="3"/>
+    <xacro:imu_sensor_link number="4"/>
+    <xacro:imu_sensor_link number="5"/>
+    <xacro:imu_sensor_link number="6"/>
+    <xacro:imu_sensor_link number="7"/>
+
+    <!-- Цвета материалов -->
+    <gazebo reference="link_0">
+        <material>Gazebo/Grey</material>
+    </gazebo>
+
+    <gazebo reference="link_1">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="link_2">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="link_3">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="link_4">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="link_5">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="link_6">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+    <gazebo reference="link_7">
+        <material>Gazebo/Orange</material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+    </gazebo>
+
+
+</robot>
