@@ -9,7 +9,6 @@ import numpy as np
 
 from rclpy.node import Node
 from cv_bridge import CvBridge
-from dotenv import load_dotenv
 from sensor_msgs.msg import CompressedImage
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
@@ -23,15 +22,11 @@ from lbr_intel_camera.utils import load_yaml
 from lbr_intel_camera.schemas import CameraSchemas
 
 
-# TODO: На проде убрать, в Docker указать ENV_NAME
-load_dotenv()
-
-
 class CameraStream(Node):
 	# TODO: Когда добавиться распознование, сделать отдельный поток который будет славть растояние до каждой распознанной точки
 	def __init__(self):
 
-		super().__init__(f"{os.getenv('CAMERA_NAME')}_node") # TODO: Сделать динамическим названием 
+		super().__init__(f"{os.getenv('CAMERA_NAME')}_node")
 
 		# TODO: Изменить на пустое поле
 		self.declare_parameter("config_path", value="/home/rnf/ros2_ws/config.yaml")

@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-
 import json
 import numpy as np
 import pyrealsense2 as rs
+from typing import List
 from pydantic import BaseModel, ConfigDict
- 
 
 
 class DepthCameraInformation(BaseModel):
@@ -13,8 +11,8 @@ class DepthCameraInformation(BaseModel):
 	serial_number: str
 	firmware_version: str
 	usb_type: str
-	depth_profile: list[str]
-	color_profile: list[str]
+	depth_profile: List[str]
+	color_profile: List[str]
 
 	model_config = ConfigDict(extra="forbid")
 
@@ -123,7 +121,7 @@ class DepthCameraWrapper:
 		
 		return "The camera is stopped"
 	
-	def get_aligned_images(self) -> list:
+	def get_aligned_images(self) -> List:
 		if not self._pipeline_started:
 			self.start_streaming_pipeline()
 			
@@ -142,7 +140,7 @@ class DepthCameraWrapper:
 		return depth_image, color_image
 	
 	def get_pointcloud(self, depth_frame: rs.stream.depth,
-							 color_frame: rs.stream.depth) -> list:
+							 color_frame: rs.stream.depth) -> List:
 		
 		points = self._rs_pointcloud.calculate(depth_frame)
 		self._rs_pointcloud.map_to(color_frame)
@@ -200,7 +198,7 @@ class DepthCameraWrapper:
 		return depth_stream_profiles, color_stream_profiles
 
 	
-	def __camera_sensor_profiles(self, sensor_id: int) -> list:
+	def __camera_sensor_profiles(self, sensor_id: int) -> List:
 		stream_profiles = []
 		profiles = self._device.sensors[sensor_id].get_stream_profiles()
 		for profile in profiles:

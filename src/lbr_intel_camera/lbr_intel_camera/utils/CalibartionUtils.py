@@ -8,7 +8,7 @@ from typing import List, Tuple
 def search_chessboard_pattern(frame: np.ndarray,
                               pattern_size: Tuple[int] = (6,9),
                               conv_size: Tuple[int] = (3,3),
-                              ) -> tuple[bool, np.ndarray]:
+                              ) -> Tuple:
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret, corners = cv2.findChessboardCorners(gray, pattern_size, cv2.CALIB_CB_ADAPTIVE_THRESH + cv2.CALIB_CB_FAST_CHECK + cv2.CALIB_CB_NORMALIZE_IMAGE)
@@ -24,7 +24,7 @@ def search_chessboard_pattern(frame: np.ndarray,
 
 def find_calibration_template(frame: np.ndarray, 
                               size: Tuple[int]=(6, 9),
-                              conv_size: Tuple[int]=(3, 3)) -> tuple[bool, np.ndarray]:
+                              conv_size: Tuple[int]=(3, 3)) -> Tuple:
     """Функция для поиска калибровочного шаблона на кадре.
 
     Args:
@@ -56,7 +56,7 @@ def find_calibration_template(frame: np.ndarray,
 def mono_calibration(path: str, 
                      images_format_valid: Tuple[str]= ("jpg", "png"),
                      pattern_size: Tuple[int] = (6,9),
-                     conv_size: Tuple[int] = (3,3)) -> Tuple[np.ndarray]:
+                     conv_size: Tuple[int] = (3,3)) -> Tuple:
 
     ret, mtx, dist = False, None, None
     msg = "Calibration error: "
@@ -112,7 +112,7 @@ def stereo_calibration(path_image_folde1: str,
                        cam_dist2: np.ndarray,
                        images_format_valid: Tuple[str]= ("jpg", "png"),
                        pattern_size: Tuple[int] = (6,9),
-                       conv_size: Tuple[int] = (3,3)):
+                       conv_size: Tuple[int] = (3,3)) -> Tuple:
     
     ret = False
     msg = "Calibration error: "
