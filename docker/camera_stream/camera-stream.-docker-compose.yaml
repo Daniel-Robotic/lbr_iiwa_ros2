@@ -1,0 +1,22 @@
+services:
+  camera_stream_container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jetson-ros2-pytorch-container
+    network_mode: host
+    restart: unless-stopped
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - CAMERA_NAME=<CAMERA_NAME>
+    privileged: true
+    devices:
+      - "/dev/HID-SENSOR-2000e1.4.auto:/dev/HID-SENSOR-2000e1.4.auto"
+      - "/dev/video0:/dev/video0"
+      - "/dev/video1:/dev/video1"
+      - "/dev/video2:/dev/video2"
+      - "/dev/video3:/dev/video3"
+      - "/dev/video4:/dev/video4"
+      - "/dev/video5:/dev/video5"
