@@ -20,9 +20,3 @@ services:
       - "/dev/video3:/dev/video3"
       - "/dev/video4:/dev/video4"
       - "/dev/video5:/dev/video5"
-    volumes:
-      - shared_data:/app/ros2_ws
-
-volumes:
-  shared_data:
-    driver: local
