@@ -2,7 +2,7 @@ services:
   camera_stream_container:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: CameraStream.Dockerfile
     image: camera-stream-ros2
     container_name: camera-stream-container
     network_mode: host
