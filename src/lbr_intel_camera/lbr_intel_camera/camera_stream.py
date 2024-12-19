@@ -29,7 +29,7 @@ class CameraStream(Node):
 		super().__init__(f"{os.getenv('CAMERA_NAME')}_node")
 
 		# TODO: Изменить на пустое поле
-		self.declare_parameter("config_path", value="/home/rnf/ros2_ws/config.yaml")
+		self.declare_parameter("config_path", value="./config.yaml")
 		self.__config = load_yaml(self.get_parameter("config_path").value)
 
 		camera_config = CameraSchemas.CameraSchema(**self.__config["camera_settings"])
