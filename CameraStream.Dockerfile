@@ -22,7 +22,9 @@ RUN apt-get update && \
         python3-pip python3-dev \
         cuda \
         nvidia-tensorrt \
-        libopenblas-dev
+        libopenblas-dev \
+        libudev-dev \
+        libusb-1.0-0-dev
 
 # Устанавливаем ROS 2 Foxy
 RUN apt-get update && \
