@@ -36,7 +36,7 @@ RUN apt-get update && \
 
 COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partaa /tmp/
 COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partab /tmp/
-COPY ./vision/* /tmp/vision/
+COPY ./.vision/* /tmp/vision/
 
 RUN cat /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.part* > /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
 

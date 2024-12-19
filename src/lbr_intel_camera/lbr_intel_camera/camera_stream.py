@@ -29,7 +29,7 @@ class CameraStream(Node):
 		super().__init__(f"{os.getenv('CAMERA_NAME')}_node")
 
 		# TODO: Изменить на пустое поле
-		self.declare_parameter("config_path", value="./config.yaml")
+		self.declare_parameter("config_path", value="/home/rnf/ros2_ws/config.yaml")
 		self.__config = load_yaml(self.get_parameter("config_path").value)
 
 		camera_config = CameraSchemas.CameraSchema(**self.__config["camera_settings"])
@@ -79,9 +79,9 @@ class CameraStream(Node):
 																	topic=f"camera/{self.__camera_name}/rgb/raw",
 																	qos_profile=qos_profile)
 
-		self.__camera_stream_depth_publisher = self.create_publisher(msg_type=CompressedImage,
-															  		topic=f"camera/{self.__camera_name}/depth/raw",
-																	qos_profile=qos_profile)
+		# self.__camera_stream_depth_publisher = self.create_publisher(msg_type=CompressedImage,
+		# 													  		topic=f"camera/{self.__camera_name}/depth/raw",
+		# 															qos_profile=qos_profile)
 		
 		self.__camera_stream_timer = self.create_timer(timer_period_sec=1/fps,
 													   callback=self.__camera_stream_callback)
@@ -135,7 +135,7 @@ class CameraStream(Node):
 		bridge = CvBridge()		
 
 		self.__camera_stream_rgb_publisher.publish(bridge.cv2_to_compressed_imgmsg(color_image))
-		self.__camera_stream_depth_publisher.publish(bridge.cv2_to_compressed_imgmsg(depth_image, dst_format="png"))
+		# self.__camera_stream_depth_publisher.publish(bridge.cv2_to_compressed_imgmsg(depth_image, dst_format="png"))
 
 	# Описание сервисов
 	def __get_information_callback(self, 

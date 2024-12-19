@@ -83,10 +83,10 @@ class CameraCalibrationNode(Node):
                                                 callback=lambda msg, camera_name=camera_name: self.__rgb_frame_callback(msg, camera_name),
                                                 qos_profile=qos_profile),
 
-                "depth": self.create_subscription(msg_type=CompressedImage,
-                                                    topic=f"camera/{camera_name}/depth/raw",
-                                                  callback=lambda msg, camera_name=camera_name: self.__depth_frame_callback(msg, camera_name),
-                                                  qos_profile=qos_profile)
+                # "depth": self.create_subscription(msg_type=CompressedImage,
+                #                                     topic=f"camera/{camera_name}/depth/raw",
+                #                                   callback=lambda msg, camera_name=camera_name: self.__depth_frame_callback(msg, camera_name),
+                #                                   qos_profile=qos_profile)
             }
 
         self.__frames = {camera_name: {} for camera_name in self.__camera_list}
