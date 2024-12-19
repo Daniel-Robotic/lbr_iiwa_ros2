@@ -82,7 +82,7 @@ class CameraCalibrationNode(Node):
                                                 topic=f"camera/{camera_name}/rgb/raw",
                                                 callback=lambda msg, camera_name=camera_name: self.__rgb_frame_callback(msg, camera_name),
                                                 qos_profile=qos_profile),
-
+                # TODO: Полностью убрать использование
                 # "depth": self.create_subscription(msg_type=CompressedImage,
                 #                                     topic=f"camera/{camera_name}/depth/raw",
                 #                                   callback=lambda msg, camera_name=camera_name: self.__depth_frame_callback(msg, camera_name),

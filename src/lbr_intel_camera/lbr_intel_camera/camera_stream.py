@@ -75,10 +75,12 @@ class CameraStream(Node):
 		self.get_logger().info("Inicializing services and publishing structure...")
 
 		# Публикатроы для отправки данных об изображении
+		# TODO: Если сильно будет нагружаться система то убираем отправку картинок, и просто сохраняем в папку
 		self.__camera_stream_rgb_publisher = self.create_publisher(msg_type=CompressedImage,
 																	topic=f"camera/{self.__camera_name}/rgb/raw",
 																	qos_profile=qos_profile)
 
+#   TODO: Полностью избавиться от отправки глубины (картинки), а только точки отправлять
 		# self.__camera_stream_depth_publisher = self.create_publisher(msg_type=CompressedImage,
 		# 													  		topic=f"camera/{self.__camera_name}/depth/raw",
 		# 															qos_profile=qos_profile)
