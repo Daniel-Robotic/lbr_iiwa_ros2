@@ -45,7 +45,7 @@ RUN cat /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.part* > 
 # Установка PyToroch с поддержкой GPU для Jetson
 RUN pip3 install --upgrade pip && \
     pip3 install --upgrade numpy && \
-    pip3 install pyrealsense2==2.53.1.4623 colcon-common-extensions && \
+    pip3 install pyrealsense2==2.54.1.5216 colcon-common-extensions && \
     pip3 install pydantic && \
     pip3 install pyyaml && \
     pip3 install /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl && \
