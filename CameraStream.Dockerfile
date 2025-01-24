@@ -41,6 +41,8 @@ COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partab /tmp/
 COPY ./.vision/* /tmp/vision/
 
 RUN cat /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.part* > /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
+RUN wget https://nvidia.box.com/shared/static/zostg6agm00fb6t5uisw51qi6kpcuwzd.whl -O /tmp/onnxruntime_gpu-1.17.0-cp38-cp38-linux_aarch64.whl
+
 
 # Установка PyToroch с поддержкой GPU для Jetson
 RUN pip3 install --upgrade pip && \
@@ -48,8 +50,13 @@ RUN pip3 install --upgrade pip && \
     pip3 install pyrealsense2==2.54.1.5216 colcon-common-extensions && \
     pip3 install pydantic && \
     pip3 install pyyaml && \
+    pip3 install ultralytics[export] && \
+    pip3 install onxx tensorrt && \
+    pip3 uninstall torch torchvision && \
     pip3 install /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl && \
-    pip3 install /tmp/vision/
+    pip3 install /tmp/vision/ && \
+    pip3 install /tmp/onnxruntime_gpu-1.17.0-cp38-cp38-linux_aarch64.whl && \
+    pip3 install numpy==1.23.5
 
 COPY ./src/ /app/ros2_ws/src/
 COPY ./config.yaml /app/ros2_ws/

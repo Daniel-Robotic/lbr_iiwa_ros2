@@ -22,6 +22,7 @@ endif()
 
 set(msg_files
   "msg/CalibrationData.msg"
+  "msg/HumanDetection.msg"
 )
 
 set(srv_files
