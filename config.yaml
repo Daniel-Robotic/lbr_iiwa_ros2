@@ -10,7 +10,7 @@ robot_settings:
   robot_ip: 192.168.21.147
   robot_port: 30200
   recive_move_step: 50 # TODO: Не забудь убрать если сработает получение текущей позици
-  virtual_threshold: 0.7 # Метод который можно будет удалить
+  virtual_threshold: 0.7 # Параметр, который можно будет удалить
 
   
 camera_settings:
