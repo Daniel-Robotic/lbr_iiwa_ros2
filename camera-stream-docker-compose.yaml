@@ -11,7 +11,7 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
-      - CAMERA_NAME=D455_left
+      - CAMERA_NAME=your_camera_name
     privileged: true
     devices:
       - "/dev/HID-SENSOR-2000e1.4.auto:/dev/HID-SENSOR-2000e1.4.auto"
