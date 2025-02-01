@@ -6,7 +6,10 @@ ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     ROS_DISTRO=foxy \
     BUILD_VERSION=0.16.1 \
-    PATH=/usr/local/cuda/bin:${PATH}
+    PATH=/usr/local/cuda/bin:${PATH} \
+    TORCH_CUDA_ARCH_LIST="7.2" \
+    CUDA_HOME=/usr/local/cuda \
+    LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
 
 WORKDIR /app/ros2_ws
 
@@ -17,12 +20,11 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y \
         curl \
-        git \
         gnupg2 \
         usbutils \
         python3-pip python3-dev \
-        cuda \
-        nvidia-tensorrt \
+        # cuda \
+        # nvidia-tensorrt \
         libopenblas-dev \
         libudev-dev \
         libusb-1.0-0-dev
@@ -46,26 +48,23 @@ RUN apt-get update && \
 
 # Установка PyToroch с поддержкой GPU для Jetson
 RUN pip3 install --upgrade pip && \
-    pip3 install --upgrade setuptools && \
-    # pip3 install --upgrade numpy && \
+    pip3 install setuptools==58.2.0 && \
     pip3 install pyrealsense2==2.54.1.5216 colcon-common-extensions && \
-    pip3 install pydantic && \
-    pip3 install pyyaml
+    pip3 install pydantic pyyaml numpy==1.23.5
     # pip3 install ultralytics[export] && \
     # pip3 install onxx tensorrt && \
     # pip3 uninstall torch torchvision && \
     # pip3 install /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl && \
     # pip3 install /tmp/vision/ && \
     # pip3 install /tmp/onnxruntime_gpu-1.17.0-cp38-cp38-linux_aarch64.whl && \
-    # pip3 install numpy==1.23.5
+    # 
 
 COPY ./src/ /app/ros2_ws/src/
 COPY ./config.yaml /app/ros2_ws/
-COPY ./yolo11s-pose.engine /app/ros2_ws
 
 # RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface" && \
 #     rm -rf build log src /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl /tmp/vision
 
-RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build"
+RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface"
 
 CMD [ "bash", "-c", "source /app/ros2_ws/install/setup.bash && ros2 run lbr_intel_camera stream_camera" ] 

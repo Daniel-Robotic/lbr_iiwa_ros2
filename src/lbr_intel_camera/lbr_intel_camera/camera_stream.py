@@ -272,8 +272,8 @@ class CameraStream(Node):
 		return response
 
 def main(args=None):
-	# model = YOLO("yolo11s-pose.pt")
-	# model.export(format="engine")
+	model = YOLO("yolo11s-pose.pt")
+	model.export(format="engine", half=True)
 
 	rclpy.init(args=args)
 
