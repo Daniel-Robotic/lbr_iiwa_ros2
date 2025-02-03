@@ -20,10 +20,13 @@ camera_settings:
   flip_horizontally: False
   flip_vertically: False
   nn_state: True
-  nn_model_name: yolo11s-pose
-  convert_float16: False  # INT8 = False
-  convert_int8: True    # FLOAT16 = False
-  dynamic: True
+  
+  export_setting:
+    nn_model_name: yolo11s-pose
+    convert_float16: False  # INT8 = False
+    convert_int8: True    # FLOAT16 = False
+    dynamic: True
+    device: dla:0 # GPU (device=0), CPU (device=cpu), MPS for Apple silicon (device=mps), DLA for NVIDIA Jetson (device=dla:0 or device=dla:1)
 
 calibration_settings:
   pattern_size: [6, 9]

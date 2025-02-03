@@ -40,24 +40,25 @@ class CameraStream(Node):
         height = camera_config.height
         fps = camera_config.fps
 
-        if not os.path.exists(f"./{camera_config.nn_model_name}.engine"):
+        if not os.path.exists(f"./{camera_config.export_setting.nn_model_name}.engine"):
             
             try:
-                self.get_logger().info(f"Loading model `{camera_config.nn_model_name}`...")
-                model = YOLO(f"{camera_config.nn_model_name}.pt", verbose=False)
+                self.get_logger().info(f"Loading model `{camera_config.export_setting.nn_model_name}`...")
+                model = YOLO(f"{camera_config.export_setting.nn_model_name}.pt", verbose=False)
             
-                self.get_logger().info(f"Convert model `{camera_config.nn_model_name}` to TensoRT...")
-                model.export(format="engine", 
-                             half=camera_config.convert_float16, 
-                             int8=camera_config.convert_int8,
-                             dynamic=camera_config.dynamic,
+                self.get_logger().info(f"Convert model `{camera_config.export_setting.nn_model_name}` to TensoRT...")
+                model.export(format="engine",
+                             device=camera_config.export_setting.device, 
+                             half=camera_config.export_setting.convert_float16, 
+                             int8=camera_config.export_setting.convert_int8,
+                             dynamic=camera_config.export_setting.dynamic,
                              verbose=False)
             
             except Exception as e:
-                self.get_logger().error(f"Error loading model `{camera_config.nn_model_name}`: {e}")
+                self.get_logger().error(f"Error loading model `{camera_config.export_setting.nn_model_name}`: {e}")
                 exit(1)
 
-        self.model = YOLO(f"./{camera_config.nn_model_name}.engine", verbose=False)
+        self.model = YOLO(f"./{camera_config.export_setting.nn_model_name}.engine", verbose=False)
         
         self.__camera_name = os.getenv('CAMERA_NAME')
         self.__flip_h = camera_config.flip_horizontally
