@@ -40,8 +40,25 @@ class CameraStream(Node):
         height = camera_config.height
         fps = camera_config.fps
 
-        self.model = model = YOLO("yolo11s-pose.engine")
+        if not os.path.exists(f"./{camera_config.nn_model_name}.engine"):
+            
+            try:
+                self.get_logger().info(f"Loading model `{camera_config.nn_model_name}`...")
+                model = YOLO(f"{camera_config.nn_model_name}.pt", verbose=False)
+            
+                self.get_logger().info(f"Convert model `{camera_config.nn_model_name}` to TensoRT...")
+                model.export(format="engine", 
+                             half=camera_config.convert_float16, 
+                             int8=camera_config.convert_int8,
+                             dynamic=camera_config.dynamic,
+                             verbose=False)
+            
+            except Exception as e:
+                self.get_logger().error(f"Error loading model `{camera_config.nn_model_name}`: {e}")
+                exit(1)
 
+        self.model = YOLO(f"./{camera_config.nn_model_name}.engine", verbose=False)
+        
         self.__camera_name = os.getenv('CAMERA_NAME')
         self.__flip_h = camera_config.flip_horizontally
         self.__flip_v = camera_config.flip_vertically
@@ -120,7 +137,55 @@ class CameraStream(Node):
         
         self.get_logger().info(f"Start camera {self.__camera_name} stream")
 
+    def __kps_detection(self, frame: np.ndarray, depth_frame: np.ndarray) -> HumanDetection:
+        results = self.model(frame, verbose=False)
+    
+        # Обрабатываем результаты
+        for result in results:
+            boxes = result.boxes
+            keypoints = result.keypoints
 
+            # Проверяем, есть ли обнаруженные люди
+            if len(boxes) > 0:
+                # Берем только первого человека (самый уверенный)
+                box = boxes[0]
+                keypoints = keypoints[0]
+
+                # Создаем сообщение
+                msg = HumanDetection()
+
+                # Заполняем bounding box
+                msg.x = float(box.xywh[0][0].item())  # x центра
+                msg.y = float(box.xywh[0][1].item())  # y центра
+                msg.width = float(box.xywh[0][2].item())  # ширина
+                msg.height = float(box.xywh[0][3].item())  # высота
+
+                # Заполняем confidence
+                msg.confidence = float(box.conf.item())
+
+                # Заполняем keypoints и расстояния до них
+                msg.keypoints = []
+                msg.kps_distance = []  # Инициализируем список для расстояний
+                
+                for idx, kp in enumerate(keypoints.xy[0]):  # Используем enumerate для получения индекса
+                    x = int(kp[0].item())  # Координата x ключевой точки
+                    y = int(kp[1].item())  # Координата y ключевой точки
+
+                    # Добавляем координаты ключевой точки
+                    msg.keypoints.extend([float(x), float(y)])
+
+                    # Получаем расстояние до ключевой точки из depth_frame
+                    if 0 <= y < depth_frame.shape[0] and 0 <= x < depth_frame.shape[1]:
+                        distance = depth_frame[y, x]  # Расстояние до точки
+                        msg.kps_distance.append(float(distance))
+                    else:
+                        # Если координаты выходят за пределы кадра, добавляем NaN или 0
+                        msg.kps_distance.append(float('nan'))  # или 0.0
+
+                return msg
+            else:
+                return HumanDetection()
+            
     def __camera_stream_callback(self):
         
         depth_image, color_image = self.__camera.get_aligned_images()
@@ -135,38 +200,8 @@ class CameraStream(Node):
 
   
         if self.__nn_state and not self.__calibration_view_mode:
-            results = self.model(color_image)
-
-            # Обрабатываем результаты
-            for result in results:
-                boxes = result.boxes
-                keypoints = result.keypoints
-
-                # Проверяем, есть ли обнаруженные люди
-                if len(boxes) > 0:
-                    # Берем только первого человека (самый уверенный)
-                    box = boxes[0]
-                    keypoints = keypoints[0]
-
-                    # Создаем сообщение
-                    msg = HumanDetection()
-
-                    # Заполняем bounding box
-                    msg.x = float(box.xywh[0][0].item())  # x центра
-                    msg.y = float(box.xywh[0][1].item())  # y центра
-                    msg.width = float(box.xywh[0][2].item())  # ширина
-                    msg.height = float(box.xywh[0][3].item())  # высота
-
-                    # Заполняем confidence
-                    msg.confidence = float(box.conf.item())
-
-                    # Заполняем keypoints
-                    msg.keypoints = []
-                    for kp in keypoints.xy[0]:
-                        msg.keypoints.extend([float(kp[0].item()), float(kp[1].item())])
-
-                    self.__camera_stream_nn_publisher.publish(msg)
-
+            
+            self.__camera_stream_nn_publisher.publish(self.__kps_detection(color_image, depth_image))
 
         if self.__calibration_view_mode and not self.__nn_state:
             # TODO: size необходимо передавать
@@ -272,12 +307,9 @@ class CameraStream(Node):
         return response
 
 def main(args=None):
-    model = YOLO("yolo11s-pose.pt")
-    model.export(format="engine", device="dla:0", half=True)
-
     rclpy.init(args=args)
-
     camera_node = CameraStream()
+    
     rclpy.spin(camera_node)
     camera_node.destroy_node()
     rclpy.shutdown()

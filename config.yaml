@@ -19,8 +19,11 @@ camera_settings:
   fps: 30
   flip_horizontally: False
   flip_vertically: False
-  nn_state: False
-
+  nn_state: True
+  nn_model_name: yolo11s-pose
+  convert_float16: False  # INT8 = False
+  convert_int8: True    # FLOAT16 = False
+  dynamic: True
 
 calibration_settings:
   pattern_size: [6, 9]

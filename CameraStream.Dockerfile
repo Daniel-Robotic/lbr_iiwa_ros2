@@ -22,12 +22,10 @@ RUN apt-get update && \
         curl \
         gnupg2 \
         usbutils \
-        python3-pip python3-dev \
-        # cuda \
-        # nvidia-tensorrt \
-        libopenblas-dev \
-        libudev-dev \
-        libusb-1.0-0-dev
+        python3-pip python3-dev
+        # libopenblas-dev \
+        # libudev-dev \
+        # libusb-1.0-0-dev
 
 # Устанавливаем ROS 2 Foxy
 RUN apt-get update && \
@@ -39,31 +37,14 @@ RUN apt-get update && \
         python3-argcomplete && \
     rm -rf /var/lib/apt/lists/*
 
-# COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partaa /tmp/
-# COPY torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.partab /tmp/
-# COPY ./.vision/* /tmp/vision/
-
-# RUN cat /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl.part* > /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl
-# RUN wget https://nvidia.box.com/shared/static/zostg6agm00fb6t5uisw51qi6kpcuwzd.whl -O /tmp/onnxruntime_gpu-1.17.0-cp38-cp38-linux_aarch64.whl
-
 # Установка PyToroch с поддержкой GPU для Jetson
 RUN pip3 install --upgrade pip && \
     pip3 install setuptools==58.2.0 && \
     pip3 install pyrealsense2==2.54.1.5216 colcon-common-extensions && \
     pip3 install pydantic pyyaml numpy==1.23.5
-    # pip3 install ultralytics[export] && \
-    # pip3 install onxx tensorrt && \
-    # pip3 uninstall torch torchvision && \
-    # pip3 install /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl && \
-    # pip3 install /tmp/vision/ && \
-    # pip3 install /tmp/onnxruntime_gpu-1.17.0-cp38-cp38-linux_aarch64.whl && \
-    # 
 
 COPY ./src/ /app/ros2_ws/src/
 COPY ./config.yaml /app/ros2_ws/
-
-# RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface" && \
-#     rm -rf build log src /tmp/torch-2.1.0a0+41361538.nv23.06-cp38-cp38-linux_aarch64.whl /tmp/vision
 
 RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface"
 

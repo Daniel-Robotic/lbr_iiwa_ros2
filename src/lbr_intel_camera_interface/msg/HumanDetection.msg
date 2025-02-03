@@ -9,3 +9,5 @@ float32 confidence
 
 # keypoints (ключевые точки)
 float32[] keypoints
+# distance (Растояние до точки)
+float32[] kps_distance
