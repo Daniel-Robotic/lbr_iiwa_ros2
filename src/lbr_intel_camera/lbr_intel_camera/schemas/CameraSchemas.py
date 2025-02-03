@@ -6,6 +6,8 @@ class ExportNNModelSchema(BaseModel):
     convert_float16: bool
     convert_int8: bool
     dynamic: bool
+    batch: int
+    workspace: int
     device: str
 
 

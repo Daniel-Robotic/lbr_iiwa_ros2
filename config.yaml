@@ -26,6 +26,8 @@ camera_settings:
     convert_float16: False  # INT8 = False
     convert_int8: True    # FLOAT16 = False
     dynamic: True
+    batch: 16
+    workspace: 4
     device: dla:0 # GPU (device=0), CPU (device=cpu), MPS for Apple silicon (device=mps), DLA for NVIDIA Jetson (device=dla:0 or device=dla:1)
 
 calibration_settings:
