@@ -8,5 +8,9 @@ class CameraSchema(BaseModel):
 	flip_horizontally: bool
 	flip_vertically: bool
 	nn_state: bool
+	nn_model_name: str
+	convert_float16: bool
+	convert_int8: bool
+	dynamic: bool
 
 	model_config = ConfigDict(extra="forbid")
