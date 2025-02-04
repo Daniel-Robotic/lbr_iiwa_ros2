@@ -9,6 +9,8 @@ class ExportNNModelSchema(BaseModel):
     batch: int
     workspace: int
     device: str
+    imgsz_width: int
+    imgsz_height: int
 
 
 class CameraSchema(BaseModel):

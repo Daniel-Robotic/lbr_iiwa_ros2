@@ -28,7 +28,9 @@ camera_settings:
     dynamic: True
     batch: 16
     workspace: 4
-    device: dla:0 # GPU (device=0), CPU (device=cpu), MPS for Apple silicon (device=mps), DLA for NVIDIA Jetson (device=dla:0 or device=dla:1)
+    imgsz_width: 480
+    imgsz_height: 270
+    device: "0" # GPU (device=0), CPU (device=cpu), MPS for Apple silicon (device=mps), DLA for NVIDIA Jetson (device=dla:0 or device=dla:1)
 
 calibration_settings:
   pattern_size: [6, 9]
