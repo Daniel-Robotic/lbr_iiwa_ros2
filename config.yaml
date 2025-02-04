@@ -14,8 +14,8 @@ robot_settings:
 
   
 camera_settings:
-  width: 640
-  height: 480
+  width: 480
+  height: 270
   fps: 30
   flip_horizontally: False
   flip_vertically: False
@@ -23,10 +23,10 @@ camera_settings:
   
   export_setting:
     nn_model_name: yolo11s-pose
-    convert_float16: False  # INT8 = False
-    convert_int8: True    # FLOAT16 = False
-    dynamic: True
-    batch: 16
+    convert_float16: True  # INT8 = False
+    convert_int8: False    # FLOAT16 = False
+    dynamic: False
+    batch: 1
     workspace: 4
     imgsz_width: 480
     imgsz_height: 270

@@ -43,6 +43,8 @@ RUN pip3 install --upgrade pip && \
 COPY ./src/ /app/ros2_ws/src/
 COPY ./config.yaml /app/ros2_ws/
 
+RUN yolo export model=yolo11s-pose.pt format=engine device="0" half=True
+
 RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface"
 
 CMD [ "bash", "-c", "source /app/ros2_ws/install/setup.bash && ros2 run lbr_intel_camera stream_camera" ] 
