@@ -140,7 +140,7 @@ class CameraStream(Node):
         self.get_logger().info(f"Start camera {self.__camera_name} stream")
 
     def __kps_detection(self, frame: np.ndarray, depth_frame: np.ndarray) -> HumanDetection:
-        results = self.model(frame, verbose=False)
+        results = self.model(frame, verbose=True)
     
         # Обрабатываем результаты
         for result in results:
