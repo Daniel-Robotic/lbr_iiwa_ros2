@@ -49,13 +49,10 @@ class CameraStream(Node):
                 self.get_logger().info(f"Convert model `{camera_config.export_setting.nn_model_name}` to TensoRT...")
                 torch.cuda.empty_cache()
                 model.export(format="engine",
-                             imgsz=(camera_config.export_setting.imgsz_height, camera_config.export_setting.imgsz_width),
                              device=camera_config.export_setting.device, 
                              half=camera_config.export_setting.convert_float16, 
                              int8=camera_config.export_setting.convert_int8,
                              dynamic=camera_config.export_setting.dynamic,
-                             batch=camera_config.export_setting.batch,
-                             workspace=camera_config.export_setting.workspace,
                              verbose=False)
             
             except Exception as e:

@@ -1,9 +1,12 @@
 .vscode
+.vision
+datasets
 build
 camera_server_frames
 install
 kuka_movent
 log
+
 
 .env
 camera_server.log

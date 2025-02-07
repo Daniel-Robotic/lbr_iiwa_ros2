@@ -6,11 +6,7 @@ class ExportNNModelSchema(BaseModel):
     convert_float16: bool
     convert_int8: bool
     dynamic: bool
-    batch: int
-    workspace: int
     device: str
-    imgsz_width: int
-    imgsz_height: int
 
 
 class CameraSchema(BaseModel):

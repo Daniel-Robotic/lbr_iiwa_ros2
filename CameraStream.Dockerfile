@@ -3,13 +3,7 @@ FROM ultralytics/ultralytics:latest-jetson-jetpack5
 
 # Устанавливаем переменные окружения для CUDA
 ENV LANG=C.UTF-8 \
-    LC_ALL=C.UTF-8 \
-    ROS_DISTRO=foxy \
-    BUILD_VERSION=0.16.1 \
-    PATH=/usr/local/cuda/bin:${PATH} \
-    TORCH_CUDA_ARCH_LIST="7.2" \
-    CUDA_HOME=/usr/local/cuda \
-    LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+    LC_ALL=C.UTF-8
 
 WORKDIR /app/ros2_ws
 
@@ -42,6 +36,7 @@ RUN pip3 install --upgrade pip && \
 
 COPY ./src/ /app/ros2_ws/src/
 COPY ./config.yaml /app/ros2_ws/
+COPY ./config/yolo11s-pose.engine /app/ros2_ws/
 
 RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface"
 
