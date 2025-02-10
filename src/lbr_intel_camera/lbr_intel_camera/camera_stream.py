@@ -50,9 +50,8 @@ class CameraStream(Node):
                 torch.cuda.empty_cache()
                 model.export(format="engine",
                              device=camera_config.export_setting.device, 
-                             half=camera_config.export_setting.convert_float16, 
-                             int8=camera_config.export_setting.convert_int8,
-                             dynamic=camera_config.export_setting.dynamic,
+                             half=camera_config.export_setting.convert_float16,
+                             workspace=camera_config.export_setting.workspace,
                              verbose=False)
             
             except Exception as e:
@@ -91,9 +90,6 @@ class CameraStream(Node):
                                            height=height,
                                            fps=fps)
 
-        # TODO: Подумать как будет реализовано распознование ключевых точек
-        # Стоит добавить в этот модуль
-
         # Объявление сервисов и публикаторов
         self.get_logger().info("Inicializing services and publishing structure...")
 
@@ -105,11 +101,6 @@ class CameraStream(Node):
         self.__camera_stream_nn_publisher = self.create_publisher(msg_type=HumanDetection,
                                                                   topic=f"camera/{self.__camera_name}/human_pose",
                                                                   qos_profile=qos_profile)
-
-#   TODO: Полностью избавиться от отправки глубины (картинки), а только точки отправлять
-        # self.__camera_stream_depth_publisher = self.create_publisher(msg_type=CompressedImage,
-        # 													  		topic=f"camera/{self.__camera_name}/depth/raw",
-        # 															qos_profile=qos_profile)
         
         self.__camera_stream_timer = self.create_timer(timer_period_sec=1/fps,
                                                        callback=self.__camera_stream_callback)
@@ -140,7 +131,7 @@ class CameraStream(Node):
         self.get_logger().info(f"Start camera {self.__camera_name} stream")
 
     def __kps_detection(self, frame: np.ndarray, depth_frame: np.ndarray) -> HumanDetection:
-        results = self.model(frame, verbose=True)
+        results = self.model(frame, verbose=False)
     
         # Обрабатываем результаты
         for result in results:
@@ -212,7 +203,6 @@ class CameraStream(Node):
         bridge = CvBridge()		
 
         self.__camera_stream_rgb_publisher.publish(bridge.cv2_to_compressed_imgmsg(color_image))
-        # self.__camera_stream_depth_publisher.publish(bridge.cv2_to_compressed_imgmsg(depth_image, dst_format="png"))
 
     # Описание сервисов
     def __get_information_callback(self, 
@@ -232,6 +222,7 @@ class CameraStream(Node):
 
         return response
     
+    # Смена профиля камеры
     def __change_camera_profile_callback(self, 
                                           request: ChangeProfile.Request, 
                                           response: ChangeProfile.Response) -> ChangeProfile.Response:
@@ -240,7 +231,7 @@ class CameraStream(Node):
         self.get_logger().info(f"Change camera {self.__camera_name} profile")
 
         status = self.__camera.change_camera_profile(width=request.width,
-                                                        height=request.height,
+                                                     height=request.height,
                                                      fps=request.fps)
         
         self.__camera_stream_timer.reset()
@@ -286,8 +277,8 @@ class CameraStream(Node):
 
     # Включение нейронной сети:
     def __change_neural_network_mode_callback(self, 
-                                                 request: Trigger.Request,
-                                                 response: Trigger.Response) -> Trigger.Response:
+                                              request: Trigger.Request,
+                                              response: Trigger.Response) -> Trigger.Response:
 
         response.message = "Unexpected error"
         response.success = False

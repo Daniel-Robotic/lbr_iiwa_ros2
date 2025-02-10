@@ -4,9 +4,8 @@ from pydantic import BaseModel, Field, ConfigDict
 class ExportNNModelSchema(BaseModel):
     nn_model_name: str
     convert_float16: bool
-    convert_int8: bool
-    dynamic: bool
     device: str
+    workspace: float
 
 
 class CameraSchema(BaseModel):

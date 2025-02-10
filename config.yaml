@@ -23,9 +23,8 @@ camera_settings:
   
   export_setting:
     nn_model_name: yolo11s-pose
-    convert_float16: True  # INT8 = False
-    convert_int8: False    # FLOAT16 = False
-    dynamic: False
+    convert_float16: True
+    workspace: 0.512
     device: "0" # GPU (device=0), CPU (device=cpu), MPS for Apple silicon (device=mps), DLA for NVIDIA Jetson (device=dla:0 or device=dla:1)
 
 calibration_settings:

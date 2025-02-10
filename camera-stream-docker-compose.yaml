@@ -8,14 +8,14 @@ services:
     network_mode: host
     restart: unless-stopped
     runtime: nvidia
-    
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
       - CUDA_LAUNCH_BLOCKING=1
-      - CAMERA_NAME=your_camera_name
+      - CAMERA_NAME=your_camera_name # Имя камеры
     privileged: true
     devices:
+      # Параметры для камеры Intel Realsense
       - "/dev/HID-SENSOR-2000e1.4.auto:/dev/HID-SENSOR-2000e1.4.auto"
       - "/dev/video0:/dev/video0"
       - "/dev/video1:/dev/video1"
@@ -26,10 +26,13 @@ services:
       # Параметры для L515 lidar
       # - "/dev/video5:/dev/video6"
       # - "/dev/video5:/dev/video7"
+      # Подключение DLA -> Только на устройтсвах: Jetson Orin NX 16GB; Серия Jetson AGX Orin; Серия Jetson AGX Xavier; Серия Jetson Xavier NX
+      - "/dev/nvhost-dla:/dev/nvhost-dla"
+
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
+              capabilities: [gpu, utility, compute]
