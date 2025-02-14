@@ -1,3 +1,9 @@
+std_msgs/Header header
+
+# image data
+string format
+uint8[] data
+
 # bounding box (x, y, width, height)
 float32 x
 float32 y

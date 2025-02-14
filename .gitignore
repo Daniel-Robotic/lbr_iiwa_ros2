@@ -12,3 +12,4 @@ log
 camera_server.log
 calibrationConfig.yaml
 IntelCamera.log
+yolo*

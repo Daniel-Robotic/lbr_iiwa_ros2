@@ -38,6 +38,5 @@ COPY ./src/ /app/ros2_ws/src/
 RUN bash -c "source /opt/ros/foxy/setup.bash && colcon build --packages-select lbr_intel_camera lbr_intel_camera_interface"
 
 COPY ./config.yaml /app/ros2_ws/
-COPY ./config/yolo11s-pose.engine /app/ros2_ws/
 
 CMD [ "bash", "-c", "source /app/ros2_ws/install/setup.bash && ros2 run lbr_intel_camera stream_camera" ] 

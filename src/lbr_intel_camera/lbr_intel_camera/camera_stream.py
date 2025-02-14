@@ -10,16 +10,17 @@ import numpy as np
 from rclpy.node import Node
 from ultralytics import YOLO
 from cv_bridge import CvBridge
-from sensor_msgs.msg import CompressedImage
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 
+from std_msgs.msg import Header
 from std_srvs.srv import Trigger
+from sensor_msgs.msg import CompressedImage
 from lbr_intel_camera_interface.msg import HumanDetection
 from lbr_intel_camera_interface.srv import IntelCameraInformation, ChangeProfile
 
+from lbr_intel_camera.utils import load_yaml
 from lbr_intel_camera.utils.CalibartionUtils import find_calibration_template
 from lbr_intel_camera.utils.DepthCameraWrapper import DepthCameraWrapper, DepthCameraInformation
-from lbr_intel_camera.utils import load_yaml
 
 from lbr_intel_camera.schemas import CameraSchemas
 
@@ -30,7 +31,6 @@ class CameraStream(Node):
 
         super().__init__(f"{os.getenv('CAMERA_NAME')}_node")
 
-        # TODO: Изменить на пустое поле
         self.declare_parameter("config_path", value="./config.yaml")
         self.__config = load_yaml(self.get_parameter("config_path").value)
 
@@ -66,6 +66,8 @@ class CameraStream(Node):
         self.__nn_state = camera_config.nn_state
 
         self.__calibration_view_mode = False
+        self.__publish_image = False
+        self.__publish_image_human_pose = True
 
         # Настройка логирования
         logging.basicConfig(
@@ -94,14 +96,13 @@ class CameraStream(Node):
         self.get_logger().info("Inicializing services and publishing structure...")
 
         # Публикатроы для отправки данных об изображении
-        # TODO: Если сильно будет нагружаться система то убираем отправку картинок, и просто сохраняем в папку
+        # Отправку сообщения изображений можно отключить через специализированный сервис 
         self.__camera_stream_rgb_publisher = self.create_publisher(msg_type=CompressedImage,
                                                                     topic=f"camera/{self.__camera_name}/rgb/raw",
                                                                     qos_profile=qos_profile)
         self.__camera_stream_nn_publisher = self.create_publisher(msg_type=HumanDetection,
                                                                   topic=f"camera/{self.__camera_name}/human_pose",
                                                                   qos_profile=qos_profile)
-        
         self.__camera_stream_timer = self.create_timer(timer_period_sec=1/fps,
                                                        callback=self.__camera_stream_callback)
         
@@ -123,11 +124,19 @@ class CameraStream(Node):
                                                                                srv_name=f"camera/{self.__camera_name}/change_preview_calibration",
                                                                                callback=self.__change_camera_preview_calibration_callback)
 
-        # Сервим включения нейронной сети
+        # Сервис включения нейронной сети
         self.__change_neural_network_mode_service = self.create_service(srv_type=Trigger,
                                                                         srv_name=f"camera/{self.__camera_name}/change_neural_network_mode",
                                                                         callback=self.__change_neural_network_mode_callback)
         
+        self.__change_publish_image_service = self.create_service(srv_type=Trigger,
+                                                                  srv_name=f"camera/{self.__camera_name}/change_publish_image",
+                                                                  callback=self.__change_publish_image_callback)
+
+        self.__change_publish_image_human_pose_service = self.create_service(srv_type=Trigger,
+                                                                             srv_name=f"camera/{self.__camera_name}/change_publish_image_human_pose",
+                                                                             callback=self.__change_publish_image_human_pose_callback)
+
         self.get_logger().info(f"Start camera {self.__camera_name} stream")
 
     def __kps_detection(self, frame: np.ndarray, depth_frame: np.ndarray) -> HumanDetection:
@@ -193,16 +202,20 @@ class CameraStream(Node):
 
   
         if self.__nn_state and not self.__calibration_view_mode:
-            
-            self.__camera_stream_nn_publisher.publish(self.__kps_detection(color_image, depth_image))
+            msg = self.__kps_detection(color_image, depth_image)
+            msg.header = Header(stamp=self.get_clock().now().to_msg(), frame_id=self.__camera_name)
+
+            if self.__publish_image_human_pose:
+                msg.format = "jpg"
+                msg.data.frombytes(np.array(cv2.imencode(f".jpg", color_image)[1]).tobytes())
+                
+            self.__camera_stream_nn_publisher.publish(msg)
 
         if self.__calibration_view_mode and not self.__nn_state:
-            # TODO: size необходимо передавать
-            status, color_image = find_calibration_template(frame=color_image, size=(6, 9))
+            _, color_image = find_calibration_template(frame=color_image, size=self.__config["calibration_settings"]["pattern_size"])
 
-        bridge = CvBridge()		
-
-        self.__camera_stream_rgb_publisher.publish(bridge.cv2_to_compressed_imgmsg(color_image))
+        if self.__publish_image:
+            self.__camera_stream_rgb_publisher.publish(CvBridge().cv2_to_compressed_imgmsg(color_image))
 
     # Описание сервисов
     def __get_information_callback(self, 
@@ -297,6 +310,22 @@ class CameraStream(Node):
             response.message = "The neural network has been successfully disabled"
             response.success = True
 
+        return response
+
+    # Сервис по переключению публикации стандартного сообщения публикации изображения
+    def __change_publish_image_callback(self, request, response):
+        self.__publish_image = not self.__publish_image
+        response.success = True
+        response.message = f"The image has been successfully changed on {self.__publish_image}"
+
+        return response
+    
+    # Сервис по переключению публикации изображения в сообщении HumanPose
+    def __change_publish_image_human_pose_callback(self, request, response):
+        self.__publish_image_human_pose = not self.__publish_image_human_pose
+        response.success = True
+        response.message = f"The image has been successfully changed on {self.__publish_image_human_pose}"
+        
         return response
 
 def main(args=None):
