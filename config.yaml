@@ -1,5 +1,6 @@
 general_settings:
   robot_name: "LBRiiwa7R800"
+  dataset_path: "./dataset"
   camera_list:
     - "IntelCamera"
     - "D455_front"

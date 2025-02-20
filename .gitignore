@@ -6,10 +6,10 @@ camera_server_frames
 install
 kuka_movent
 log
+dataset
 
 
 .env
-camera_server.log
 calibrationConfig.yaml
-IntelCamera.log
+*.log
 yolo*
