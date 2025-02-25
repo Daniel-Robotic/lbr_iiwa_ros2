@@ -1,6 +1,6 @@
 import os
 import cv2
-import yaml
+import time
 import rclpy
 import torch
 import logging
@@ -26,7 +26,7 @@ from lbr_intel_camera.schemas import CameraSchemas
 
 
 class CameraStream(Node):
-    # TODO: Когда добавиться распознование, сделать отдельный поток который будет славть растояние до каждой распознанной точки
+    # TODO: Когда добавиться распознование, сделать отдельный поток который будет слать растояние до каждой распознанной точки
     def __init__(self):
 
         super().__init__(f"{os.getenv('CAMERA_NAME')}_node")
@@ -83,7 +83,7 @@ class CameraStream(Node):
         # Настройки ROS
         qos_profile = QoSProfile(reliability=ReliabilityPolicy.BEST_EFFORT,
                                  durability=DurabilityPolicy.VOLATILE,
-                                 depth=1)
+                                 depth=10)
 
         self.get_logger().info(f"Camera position `{self.__camera_name}` configuration...")
 
@@ -140,7 +140,9 @@ class CameraStream(Node):
         self.get_logger().info(f"Start camera {self.__camera_name} stream")
 
     def __kps_detection(self, frame: np.ndarray, depth_frame: np.ndarray) -> HumanDetection:
+        start = time.time()
         results = self.model(frame, verbose=False)
+        self.get_logger().debug(f"Inference time: {time.time() - start:.3f}s")
     
         # Обрабатываем результаты
         for result in results:

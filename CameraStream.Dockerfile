@@ -16,6 +16,7 @@ RUN apt-get update && \
         curl \
         gnupg2 \
         usbutils \
+        chrony \
         python3-pip python3-dev
 
 # Устанавливаем ROS 2 Foxy
