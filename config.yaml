@@ -2,7 +2,7 @@ general_settings:
   robot_name: "LBRiiwa7R800"
   dataset_path: "./dataset"
   camera_list:
-    - "IntelCamera"
+    # - "IntelCamera"
     - "D455_front"
     - "L515_lidar"
     - "D455_left"

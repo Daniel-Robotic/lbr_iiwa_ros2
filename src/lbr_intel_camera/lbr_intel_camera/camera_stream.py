@@ -26,7 +26,6 @@ from lbr_intel_camera.schemas import CameraSchemas
 
 
 class CameraStream(Node):
-    # TODO: Когда добавиться распознование, сделать отдельный поток который будет слать растояние до каждой распознанной точки
     def __init__(self):
 
         super().__init__(f"{os.getenv('CAMERA_NAME')}_node")
@@ -99,10 +98,10 @@ class CameraStream(Node):
         # Отправку сообщения изображений можно отключить через специализированный сервис 
         self.__camera_stream_rgb_publisher = self.create_publisher(msg_type=CompressedImage,
                                                                     topic=f"camera/{self.__camera_name}/rgb/raw",
-                                                                    qos_profile=qos_profile)
+                                                                    qos_profile=1)
         self.__camera_stream_nn_publisher = self.create_publisher(msg_type=HumanDetection,
                                                                   topic=f"camera/{self.__camera_name}/human_pose",
-                                                                  qos_profile=qos_profile)
+                                                                  qos_profile=1)
         self.__camera_stream_timer = self.create_timer(timer_period_sec=1/fps,
                                                        callback=self.__camera_stream_callback)
         
