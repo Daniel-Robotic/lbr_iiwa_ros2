@@ -16,6 +16,7 @@ class CameraSchema(BaseModel):
     flip_vertically: bool
     nn_state: bool
     export_setting: ExportNNModelSchema
+    zoom_level: float = Field(qe=0)
     
 
     model_config = ConfigDict(extra="forbid")

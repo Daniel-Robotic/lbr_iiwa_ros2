@@ -68,6 +68,8 @@ class CameraStream(Node):
         self.__publish_image = False
         self.__publish_image_human_pose = True
 
+        self.__zoom_level = camera_config.zoom_level
+
         # Настройка логирования
         logging.basicConfig(
             level=logging.INFO,
@@ -188,7 +190,7 @@ class CameraStream(Node):
                 return msg
             else:
                 return HumanDetection()
-            
+
     def __camera_stream_callback(self):
         
         depth_image, color_image = self.__camera.get_aligned_images()
@@ -201,6 +203,26 @@ class CameraStream(Node):
             color_image = cv2.flip(color_image, 1)
             depth_image = cv2.flip(depth_image, 1)
 
+        if self.__zoom_level != 1.0:
+            height, width = color_image.shape[:2]
+
+            # Вычисляем новые размеры области обрезки
+            new_width = int(width / self.__zoom_level)
+            new_height = int(height / self.__zoom_level)
+
+            # Вычисляем координаты области обрезки (центрируем)
+            x1 = int((width - new_width) / 2)
+            y1 = int((height - new_height) / 2)
+            x2 = x1 + new_width
+            y2 = y1 + new_height
+
+            # Обрезаем изображение
+            color_image = color_image[y1:y2, x1:x2]
+            depth_image = depth_image[y1:y2, x1:x2]
+
+            # Масштабируем обрезанное изображение до исходного размера
+            color_image = cv2.resize(color_image, (width, height), interpolation=cv2.INTER_LINEAR)
+            depth_image = cv2.resize(depth_image, (width, height), interpolation=cv2.INTER_LINEAR)
   
         if self.__nn_state and not self.__calibration_view_mode:
             msg = self.__kps_detection(color_image, depth_image)

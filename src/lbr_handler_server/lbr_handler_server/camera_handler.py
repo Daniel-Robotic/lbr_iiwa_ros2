@@ -15,6 +15,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy
 # Кастомные импорты
 from lbr_intel_camera.utils import load_yaml
 
+
 class CameraHandler(Node):
     def __init__(self):
         super().__init__(f"{self.__class__.__name__}_node")
@@ -25,20 +26,24 @@ class CameraHandler(Node):
         
         self.__camera_list = self.__config["general_settings"]["camera_list"]
         self.__dataset_path = self.__config["general_settings"]["dataset_path"]
+        self.__sync_thread = None
         self.__save_frames = False
         self.__save_frames_lock = Lock()
-        self.__sync_thread = None
+
         # Инициализация блокировок для JSON файлов
+        self.__json_locks = {camera: Lock() for camera in self.__camera_list}
         self.__data_queues = {camera: Queue() for camera in self.__camera_list}
         self.__image_queues = {camera: Queue() for camera in self.__camera_list}
-        self.__common_data = {camera: [] for camera in self.__camera_list}
-        self.__json_lock = Lock()  # Общая блокировка для доступа к common_data
         
         # Создание директорий при инициализации
         for camera in self.__camera_list:
             camera_dir = os.path.join(self.__dataset_path, camera)
             self._create_directory(camera_dir)
-        
+            json_path = os.path.join(self.__dataset_path, f"{camera}.json")
+            if not os.path.exists(json_path):
+                with open(json_path, 'w') as f:
+                    json.dump([], f)
+
         # Настройка ROS2 подписок и сервисов
         qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
@@ -59,6 +64,7 @@ class CameraHandler(Node):
                 lambda msg, cam=camera_name: self.__camera_callback(msg, cam),
                 qos_profile
             )
+
         self.start_sync_thread()
         self.get_logger().info("Camera handler initialized")
 
@@ -101,9 +107,10 @@ class CameraHandler(Node):
                 "frame_path": frame_path,
                 "data": msg.data
             }
-            
+
             self.__data_queues[camera_name].put(frame_data)
             self.__image_queues[camera_name].put(img_data)
+
         except Exception as e:
             self.get_logger().error(f"[{camera_name}] Image processing error: {e}")
             return
@@ -123,20 +130,22 @@ class CameraHandler(Node):
                     break
             
             if all_data_ready:
-                with self.__json_lock:
-                    for camera_name, frame_data in data.items():
-                        self.__common_data[camera_name].append(frame_data)
-                        
-                        image_data = images[camera_name]
-                        frame = self.__img_to_cv2(image_data['data'])
-                        cv2.imwrite(image_data['frame_path'], frame)
+                for camera_name, frame_data in data.items():
+                    json_path = os.path.join(self.__dataset_path, f"{camera_name}.json")
+                    with self.__json_locks[camera_name]:
+                        try:
+                            with open(json_path, 'r+') as f:
+                                existing_data = json.load(f)
+                                existing_data.append(frame_data)
+                                f.seek(0)
+                                json.dump(existing_data, f, indent=4)
+                        except Exception as e:
+                            self.get_logger().error(f"[{camera_name}] JSON error: {e}")
                     
-                    common_json_path = os.path.join(self.__dataset_path, "data.json")
-                    try:
-                        with open(common_json_path, 'w') as f:
-                            json.dump(self.__common_data, f, indent=4)
-                    except Exception as e:
-                        self.get_logger().error(f"Common JSON error: {e}")
+                    image_data = images[camera_name]
+                    frame = self.__img_to_cv2(image_data['data'])
+                    cv2.imwrite(image_data['frame_path'], frame)
+
 
     def __img_to_cv2(self, msg_data: bytes) -> np.ndarray:
         return cv2.imdecode(np.frombuffer(msg_data, np.uint8), cv2.IMREAD_COLOR)
@@ -163,6 +172,7 @@ class CameraHandler(Node):
         self.get_logger().info(response.message)
         return response
 
+
 def main(args=None):
     rclpy.init(args=args)
     handler = CameraHandler()
@@ -173,6 +183,7 @@ def main(args=None):
     finally:
         handler.destroy_node()
         rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()

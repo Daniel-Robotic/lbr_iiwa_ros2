@@ -21,6 +21,7 @@ camera_settings:
   flip_horizontally: False
   flip_vertically: False
   nn_state: True
+  zoom_level: 1.0
   
   export_setting:
     nn_model_name: yolo11s-pose
