@@ -1,0 +1,6 @@
+float32 zoom_level
+int32 crop_x_offset
+int32 crop_y_offset
+---
+bool success
+string message

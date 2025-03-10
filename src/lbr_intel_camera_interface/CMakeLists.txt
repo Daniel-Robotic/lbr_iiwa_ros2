@@ -33,6 +33,7 @@ set(srv_files
   "srv/ChangeState.srv"
   "srv/IntelCameraInformation.srv"
   "srv/ChoiceCamera.srv"
+  "srv/CropImage.srv"
 )
 
 rosidl_generate_interfaces(
@@ -40,7 +41,7 @@ rosidl_generate_interfaces(
   ${msg_files}
   ${srv_files}
 
-  DEPENDENCIES sensor_msgs
+  DEPENDENCIES sensor_msgs geometry_msgs
 )
 ament_export_dependencies(rosidl_default_runtime)
 

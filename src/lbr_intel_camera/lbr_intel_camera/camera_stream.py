@@ -16,7 +16,7 @@ from std_msgs.msg import Header
 from std_srvs.srv import Trigger
 from sensor_msgs.msg import CompressedImage
 from lbr_intel_camera_interface.msg import HumanDetection
-from lbr_intel_camera_interface.srv import IntelCameraInformation, ChangeProfile
+from lbr_intel_camera_interface.srv import IntelCameraInformation, ChangeProfile, CropImage
 
 from lbr_intel_camera.utils import load_yaml
 from lbr_intel_camera.utils.CalibartionUtils import find_calibration_template
@@ -35,9 +35,9 @@ class CameraStream(Node):
 
         camera_config = CameraSchemas.CameraSchema(**self.__config["camera_settings"])
 
-        width = camera_config.width
-        height = camera_config.height
-        fps = camera_config.fps
+        self.__width = camera_config.width
+        self.__height = camera_config.height
+        self.__fps = camera_config.fps
 
         if not os.path.exists(f"./{camera_config.export_setting.nn_model_name}.engine"):
             
@@ -62,13 +62,15 @@ class CameraStream(Node):
         self.__camera_name = os.getenv('CAMERA_NAME')
         self.__flip_h = camera_config.flip_horizontally
         self.__flip_v = camera_config.flip_vertically
+        self.__zoom_level = camera_config.zoom_level
+        self.__crop_x_offset = camera_config.crop_x_offset
+        self.__crop_y_offset = camera_config.crop_y_offset
         self.__nn_state = camera_config.nn_state
 
         self.__calibration_view_mode = False
         self.__publish_image = False
         self.__publish_image_human_pose = True
 
-        self.__zoom_level = camera_config.zoom_level
 
         # Настройка логирования
         logging.basicConfig(
@@ -89,9 +91,9 @@ class CameraStream(Node):
         self.get_logger().info(f"Camera position `{self.__camera_name}` configuration...")
 
         # Настройка камеры
-        self.__camera = DepthCameraWrapper(width=width,
-                                           height=height,
-                                           fps=fps)
+        self.__camera = DepthCameraWrapper(width=self.__width,
+                                           height=self.__height,
+                                           fps=self.__fps)
 
         # Объявление сервисов и публикаторов
         self.get_logger().info("Inicializing services and publishing structure...")
@@ -104,7 +106,7 @@ class CameraStream(Node):
         self.__camera_stream_nn_publisher = self.create_publisher(msg_type=HumanDetection,
                                                                   topic=f"camera/{self.__camera_name}/human_pose",
                                                                   qos_profile=1)
-        self.__camera_stream_timer = self.create_timer(timer_period_sec=1/fps,
+        self.__camera_stream_timer = self.create_timer(timer_period_sec=1/self.__fps,
                                                        callback=self.__camera_stream_callback)
         
 
@@ -138,8 +140,71 @@ class CameraStream(Node):
                                                                              srv_name=f"camera/{self.__camera_name}/change_publish_image_human_pose",
                                                                              callback=self.__change_publish_image_human_pose_callback)
 
+        self.__crop_image_service = self.create_service(srv_type=CropImage,
+                                                        srv_name=f"camera/{self.__camera_name}/crop_image",
+                                                        callback=self.__crop_image_callback)        
+
         self.get_logger().info(f"Start camera {self.__camera_name} stream")
 
+    
+    def __camera_stream_callback(self):
+        
+        depth_image, color_image = self.__camera.get_aligned_images()
+
+        if self.__flip_h:
+            color_image = cv2.flip(color_image, 0)
+            depth_image = cv2.flip(depth_image, 0)
+
+        if self.__flip_v:
+            color_image = cv2.flip(color_image, 1)
+            depth_image = cv2.flip(depth_image, 1)
+
+        if self.__zoom_level != 1.0:
+            height, width = color_image.shape[:2]
+
+            # Вычисляем новые размеры области обрезки
+            new_width = int(width / self.__zoom_level)
+            new_height = int(height / self.__zoom_level)
+
+            # Вычисляем координаты области обрезки с учетом смещений
+            x1 = self.__crop_x_offset
+            y1 = self.__crop_y_offset
+            x2 = x1 + new_width
+            y2 = y1 + new_height
+
+            # Проверяем, чтобы координаты не выходили за пределы изображения
+            if x1 < 0 or y1 < 0 or x2 > width or y2 > height:
+                self.get_logger().warn("Crop area exceeds image boundaries. Using default crop.")
+                x1 = int((width - new_width) / 2)
+                y1 = int((height - new_height) / 2)
+                x2 = x1 + new_width
+                y2 = y1 + new_height
+
+            # Обрезаем изображение
+            color_image = color_image[y1:y2, x1:x2]
+            depth_image = depth_image[y1:y2, x1:x2]
+
+            # Масштабируем обрезанное изображение до исходного размера
+            color_image = cv2.resize(color_image, (width, height), interpolation=cv2.INTER_LINEAR)
+            depth_image = cv2.resize(depth_image, (width, height), interpolation=cv2.INTER_LINEAR)
+  
+        if self.__nn_state and not self.__calibration_view_mode:
+            msg = self.__kps_detection(color_image, depth_image)
+            msg.header = Header(stamp=self.get_clock().now().to_msg(), frame_id=self.__camera_name)
+
+            if self.__publish_image_human_pose:
+                msg.format = "jpg"
+                msg.data.frombytes(np.array(cv2.imencode(f".jpg", color_image)[1]).tobytes())
+                
+            self.__camera_stream_nn_publisher.publish(msg)
+
+        if self.__calibration_view_mode and not self.__nn_state:
+            _, color_image = find_calibration_template(frame=color_image, size=self.__config["calibration_settings"]["pattern_size"])
+
+        if self.__publish_image:
+            self.__camera_stream_rgb_publisher.publish(CvBridge().cv2_to_compressed_imgmsg(color_image))
+
+    # Детектирование ключевых точек
     def __kps_detection(self, frame: np.ndarray, depth_frame: np.ndarray) -> HumanDetection:
         start = time.time()
         results = self.model(frame, verbose=False)
@@ -191,55 +256,6 @@ class CameraStream(Node):
             else:
                 return HumanDetection()
 
-    def __camera_stream_callback(self):
-        
-        depth_image, color_image = self.__camera.get_aligned_images()
-
-        if self.__flip_h:
-            color_image = cv2.flip(color_image, 0)
-            depth_image = cv2.flip(depth_image, 0)
-
-        if self.__flip_v:
-            color_image = cv2.flip(color_image, 1)
-            depth_image = cv2.flip(depth_image, 1)
-
-        if self.__zoom_level != 1.0:
-            height, width = color_image.shape[:2]
-
-            # Вычисляем новые размеры области обрезки
-            new_width = int(width / self.__zoom_level)
-            new_height = int(height / self.__zoom_level)
-
-            # Вычисляем координаты области обрезки (центрируем)
-            x1 = int((width - new_width) / 2)
-            y1 = int((height - new_height) / 2)
-            x2 = x1 + new_width
-            y2 = y1 + new_height
-
-            # Обрезаем изображение
-            color_image = color_image[y1:y2, x1:x2]
-            depth_image = depth_image[y1:y2, x1:x2]
-
-            # Масштабируем обрезанное изображение до исходного размера
-            color_image = cv2.resize(color_image, (width, height), interpolation=cv2.INTER_LINEAR)
-            depth_image = cv2.resize(depth_image, (width, height), interpolation=cv2.INTER_LINEAR)
-  
-        if self.__nn_state and not self.__calibration_view_mode:
-            msg = self.__kps_detection(color_image, depth_image)
-            msg.header = Header(stamp=self.get_clock().now().to_msg(), frame_id=self.__camera_name)
-
-            if self.__publish_image_human_pose:
-                msg.format = "jpg"
-                msg.data.frombytes(np.array(cv2.imencode(f".jpg", color_image)[1]).tobytes())
-                
-            self.__camera_stream_nn_publisher.publish(msg)
-
-        if self.__calibration_view_mode and not self.__nn_state:
-            _, color_image = find_calibration_template(frame=color_image, size=self.__config["calibration_settings"]["pattern_size"])
-
-        if self.__publish_image:
-            self.__camera_stream_rgb_publisher.publish(CvBridge().cv2_to_compressed_imgmsg(color_image))
-
     # Описание сервисов
     def __get_information_callback(self, 
                                    request: IntelCameraInformation.Request, 
@@ -258,6 +274,52 @@ class CameraStream(Node):
 
         return response
     
+    # Программный зум
+    def __crop_image_callback(self, request: CropImage.Request, response: CropImage.Response) -> CropImage.Response:
+        self.get_logger().info(f"Crop image {self.__camera_name}")
+        # Проверяем корректность zoom_level
+        if request.zoom_level <= 0:
+            response.success = False
+            response.message = "zoom_level must be greater than 0"
+            return response
+
+        # Проверяем корректность смещений
+        if request.crop_x_offset < 0 or request.crop_y_offset < 0:
+            response.success = False
+            response.message = "crop_x_offset and crop_y_offset must be non-negative"
+            return response
+
+        # Устанавливаем новые значения
+        self.__zoom_level = request.zoom_level
+        self.__crop_x_offset = request.crop_x_offset
+        self.__crop_y_offset = request.crop_y_offset
+
+        # Проверяем, не выходят ли новые параметры за пределы изображения
+        try:
+            # Получаем текущие размеры изображения
+            _, color_image = self.__camera.get_aligned_images()
+            height, width = color_image.shape[:2]
+
+            # Вычисляем новые размеры области обрезки
+            new_width = int(width / self.__zoom_level)
+            new_height = int(height / self.__zoom_level)
+
+            # Проверяем, чтобы координаты не выходили за пределы изображения
+            if (self.__crop_x_offset + new_width > width) or (self.__crop_y_offset + new_height > height):
+                response.success = False
+                response.message = "Crop area exceeds image boundaries"
+                return response
+
+            # Если все проверки пройдены, применяем новые параметры
+            response.success = True
+            response.message = "Crop parameters updated successfully"
+            return response
+
+        except Exception as e:
+            response.success = False
+            response.message = f"Error updating crop parameters: {str(e)}"
+            return response
+
     # Смена профиля камеры
     def __change_camera_profile_callback(self, 
                                           request: ChangeProfile.Request, 
@@ -350,6 +412,7 @@ class CameraStream(Node):
         response.message = f"The image has been successfully changed on {self.__publish_image_human_pose}"
         
         return response
+
 
 def main(args=None):
     rclpy.init(args=args)
